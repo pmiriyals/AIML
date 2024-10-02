@@ -43,7 +43,7 @@ class Value:
         return self + (-other)
     
     def __rsub__(self, other):
-        return self - other
+        return -self + other
     
     def __pow__(self, other):
         assert isinstance(other, (int, float)), "can only accept int or float"
@@ -72,6 +72,13 @@ class Value:
         out = Value(t, (self, ), 'tanh')
         def _backward():
             self.grad += out.grad * (1-t**2)
+        out._backward = _backward
+        return out
+    
+    def relu(self):
+        out = Value(0 if self.data < 0 else self.data, (self, ), 'relu')
+        def _backward():
+            self.grad += out.grad * (out.data > 0)
         out._backward = _backward
         return out
     
